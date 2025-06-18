@@ -16,29 +16,14 @@ use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
 use Tourze\EasyAdmin\Attribute\Action\Copyable;
-use Tourze\EasyAdmin\Attribute\Action\Creatable;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Action\Editable;
-use Tourze\EasyAdmin\Attribute\Column\BoolColumn;
 use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Field\FormField;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 
-#[AsPermission(title: 'AI任务')]
-#[Creatable]
-#[Editable]
-#[Deletable]
 #[Copyable]
 #[ORM\Entity]
 #[ORM\Table(name: 'ims_open_ai_task', options: ['comment' => 'AI任务'])]
 class Task implements \Stringable
 {
     use TimestampableAware;
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'recursive_view', 'api_tree'])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
@@ -46,42 +31,30 @@ class Task implements \Stringable
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => 'ID'])]
     private ?string $id = null;
 
-    #[BoolColumn]
     #[IndexColumn]
     #[TrackColumn]
     #[Groups(['admin_curd', 'restful_read', 'restful_read', 'restful_write'])]
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
-    #[ListColumn(order: 97)]
-    #[FormField(order: 97)]
     private ?bool $valid = false;
 
     #[CopyColumn(suffix: '-复制')]
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 50, options: ['comment' => '任务名称'])]
     private string $name;
 
     #[CopyColumn]
-    #[FormField]
     #[ORM\Column(type: Types::TEXT, options: ['comment' => '任务要求'])]
     private string $requirements;
 
     #[CopyColumn]
-    #[ListColumn(title: '执行者')]
-    #[FormField(title: '执行者')]
     #[ORM\ManyToOne(targetEntity: Character::class)]
     #[ORM\JoinColumn(name: 'executor_id', nullable: false, onDelete: 'CASCADE')]
     private Character $executor;
 
     #[CopyColumn]
-    #[ListColumn(title: '负责人')]
-    #[FormField(title: '负责人')]
     #[ORM\ManyToOne(targetEntity: Character::class)]
     #[ORM\JoinColumn(name: 'manager_id', nullable: false, onDelete: 'CASCADE')]
     private Character $manager;
 
-    #[ListColumn]
-    #[FormField]
     #[ORM\Column(type: Types::STRING, length: 20, enumType: TaskStatus::class, options: ['comment' => '任务状态'])]
     private TaskStatus $status = TaskStatus::PENDING;
 
@@ -98,17 +71,11 @@ class Task implements \Stringable
     #[ORM\JoinColumn(name: 'manager_conversation_id', nullable: true, onDelete: 'SET NULL')]
     private ?Conversation $managerConversation = null;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
     #[CreateTimeColumn]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]#[UpdateTimeColumn]
-    #[ListColumn(order: 99, sorter: true)]
     #[Groups(['restful_read', 'admin_curd', 'restful_read'])]
-    #[Filterable]
-    #[ExportColumn]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '更新时间'])]public function __toString(): string
     {
         if (!$this->getId()) {
