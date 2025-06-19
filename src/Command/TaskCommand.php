@@ -20,11 +20,13 @@ use Tourze\OpenAITaskBundle\Entity\Task;
 use Tourze\OpenAITaskBundle\Repository\TaskRepository;
 
 #[AsCommand(
-    name: 'open-ai:task',
+    name: TaskCommand::NAME,
     description: '执行 AI 任务',
 )]
 class TaskCommand extends Command
 {
+    public const NAME = 'open-ai:task';
+
     public function __construct(
         private readonly OpenAiService $openAiService,
         private readonly TaskRepository $taskRepository,
@@ -65,7 +67,7 @@ HELP
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $taskId = $input->getOption('task');
-        if (!$taskId) {
+        if ($taskId === null || $taskId === '') {
             $output->writeln('<error>请使用 -t 或 --task 选项指定任务 ID</error>');
 
             return Command::FAILURE;
@@ -228,7 +230,8 @@ HELP
             $managerResponse = $this->getAiResponse($managerConversation, $manager, RoleEnum::assistant, $debug, $output);
 
             // 解析负责人的指令
-            if (preg_match('/^(continue|task_done|task_failed)[:\s]*(.*)/i', $managerResponse, $matches)) {
+            $matches = [];
+            if (preg_match('/^(continue|task_done|task_failed)[:\s]*(.*)/i', $managerResponse, $matches) === 1) {
                 $executionCommand = trim($matches[2] ?: '继续执行任务');
 
                 switch (strtolower($matches[1])) {
@@ -286,7 +289,7 @@ HELP
         }
 
         $apiKey = $character->getPreferredApiKey();
-        if (!$apiKey) {
+        if ($apiKey === null) {
             throw new \RuntimeException('角色未配置 API 密钥');
         }
 
@@ -300,7 +303,7 @@ HELP
             'frequency_penalty' => $character->getFrequencyPenalty(),
         ];
 
-        $tools = $apiKey->isFunctionCalling() ? $this->functionService->generateToolsArray($character) : [];
+        $tools = ($apiKey->isFunctionCalling() === true) ? $this->functionService->generateToolsArray($character) : [];
         if (!empty($tools)) {
             $options['tools'] = $tools;
         }

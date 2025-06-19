@@ -13,10 +13,7 @@ use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineTrackBundle\Attribute\TrackColumn;
-use Tourze\EasyAdmin\Attribute\Action\Copyable;
-use Tourze\EasyAdmin\Attribute\Column\CopyColumn;
 
-#[Copyable]
 #[ORM\Entity]
 #[ORM\Table(name: 'ims_open_ai_task', options: ['comment' => 'AI任务'])]
 class Task implements \Stringable
@@ -35,20 +32,16 @@ class Task implements \Stringable
     #[ORM\Column(type: Types::BOOLEAN, nullable: true, options: ['comment' => '有效', 'default' => 0])]
     private ?bool $valid = false;
 
-    #[CopyColumn(suffix: '-复制')]
     #[ORM\Column(type: Types::STRING, length: 50, options: ['comment' => '任务名称'])]
     private string $name;
 
-    #[CopyColumn]
     #[ORM\Column(type: Types::TEXT, options: ['comment' => '任务要求'])]
     private string $requirements;
 
-    #[CopyColumn]
     #[ORM\ManyToOne(targetEntity: Character::class)]
     #[ORM\JoinColumn(name: 'executor_id', nullable: false, onDelete: 'CASCADE')]
     private Character $executor;
 
-    #[CopyColumn]
     #[ORM\ManyToOne(targetEntity: Character::class)]
     #[ORM\JoinColumn(name: 'manager_id', nullable: false, onDelete: 'CASCADE')]
     private Character $manager;
@@ -71,7 +64,8 @@ class Task implements \Stringable
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        $id = $this->getId();
+        if ($id === null || $id === '') {
             return '';
         }
 
