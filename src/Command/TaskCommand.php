@@ -20,7 +20,7 @@ use Tourze\OpenAITaskBundle\Entity\Task;
 use Tourze\OpenAITaskBundle\Repository\TaskRepository;
 
 #[AsCommand(
-    name: TaskCommand::NAME,
+    name: self::NAME,
     description: '执行 AI 任务',
 )]
 class TaskCommand extends Command
