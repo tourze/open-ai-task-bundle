@@ -4,5 +4,10 @@ services:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
-  Tourze\OpenAITaskBundle\Service\:
-    resource: '../../Service/'
+  Tourze\OpenAITaskBundle\Command\:
+    resource: '../../Command/'
+    tags: ['console.command']
+
+  Tourze\OpenAITaskBundle\Repository\:
+    resource: '../../Repository/'
+    tags: ['doctrine.repository_service']

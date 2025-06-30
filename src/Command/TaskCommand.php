@@ -10,13 +10,15 @@ use OpenAIBundle\Enum\TaskStatus;
 use OpenAIBundle\Service\ConversationService;
 use OpenAIBundle\Service\FunctionService;
 use OpenAIBundle\Service\OpenAiService;
-use OpenAIBundle\VO\StreamChunkVO;
+use OpenAIBundle\VO\StreamRequestOptions;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Tourze\OpenAITaskBundle\Entity\Task;
+use Tourze\OpenAITaskBundle\Exception\ApiKeyNotConfiguredException;
+use Tourze\OpenAITaskBundle\Exception\TaskExecutionException;
 use Tourze\OpenAITaskBundle\Repository\TaskRepository;
 
 #[AsCommand(
@@ -232,7 +234,7 @@ HELP
             // 解析负责人的指令
             $matches = [];
             if (preg_match('/^(continue|task_done|task_failed)[:\s]*(.*)/i', $managerResponse, $matches) === 1) {
-                $executionCommand = trim($matches[2] ?: '继续执行任务');
+                $executionCommand = trim($matches[2] !== '' ? $matches[2] : '继续执行任务');
 
                 switch (strtolower($matches[1])) {
                     case 'task_done':
@@ -275,7 +277,7 @@ HELP
         // 超过最大轮次限制
         $task->setStatus(TaskStatus::FAILED);
         $this->entityManager->flush();
-        throw new \RuntimeException('任务超过最大轮次限制仍未完成');
+        throw new TaskExecutionException('任务超过最大轮次限制仍未完成');
     }
 
     private function getAiResponse(Conversation $conversation, Character $character, RoleEnum $role, bool $debug, OutputInterface $output): string
@@ -290,32 +292,26 @@ HELP
 
         $apiKey = $character->getPreferredApiKey();
         if ($apiKey === null) {
-            throw new \RuntimeException('角色未配置 API 密钥');
+            throw new ApiKeyNotConfiguredException('角色未配置 API 密钥');
         }
-
-        $options = [
-            'debug' => $debug,
-            'model' => $apiKey->getModel(),
-            'temperature' => $character->getTemperature(),
-            'top_p' => $character->getTopP(),
-            'max_tokens' => $character->getMaxTokens(),
-            'presence_penalty' => $character->getPresencePenalty(),
-            'frequency_penalty' => $character->getFrequencyPenalty(),
-        ];
 
         $tools = ($apiKey->isFunctionCalling() === true) ? $this->functionService->generateToolsArray($character) : [];
-        if (!empty($tools)) {
-            $options['tools'] = $tools;
-        }
+
+        $options = new StreamRequestOptions(
+            debug: $debug,
+            model: $apiKey->getModel(),
+            temperature: $character->getTemperature(),
+            topP: $character->getTopP(),
+            maxTokens: $character->getMaxTokens(),
+            presencePenalty: $character->getPresencePenalty(),
+            frequencyPenalty: $character->getFrequencyPenalty(),
+            tools: !empty($tools) ? $tools : null,
+        );
 
         $response = '';
         $message = null;
 
         foreach ($this->openAiService->streamReasoner($apiKey, $messages, $options) as $chunk) {
-            if (!$chunk instanceof StreamChunkVO) {
-                continue;
-            }
-
             foreach ($chunk->getChoices() as $choice) {
                 if (null !== $choice->getContent()) {
                     $content = $choice->getContent();
