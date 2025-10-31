@@ -1,13 +1,20 @@
 services:
-  # default configuration for services in *this* file
   _defaults:
-    autowire: true      # Automatically injects dependencies in your services.
-    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    autowire: true
+    autoconfigure: true
 
-  Tourze\OpenAITaskBundle\Command\:
-    resource: '../../Command/'
-    tags: ['console.command']
-
-  Tourze\OpenAITaskBundle\Repository\:
-    resource: '../../Repository/'
-    tags: ['doctrine.repository_service']
+  Tourze\OpenAITaskBundle\Command\TaskCommand:
+    public: true
+    
+  Tourze\OpenAITaskBundle\Repository\TaskRepository:
+    public: true
+    
+  Tourze\OpenAITaskBundle\Service\AdminMenu:
+    public: true
+    tags:
+      - name: 'app.easy_admin_menu_provider'
+      
+  Tourze\OpenAITaskBundle\Controller\Admin\TaskCrudController:
+    public: true
+    tags:
+      - name: 'controller.service_arguments'

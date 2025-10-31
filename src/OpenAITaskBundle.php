@@ -2,18 +2,26 @@
 
 namespace Tourze\OpenAITaskBundle;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use OpenAIBundle\OpenAIBundle;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Tourze\BundleDependency\BundleDependencyInterface;
+use Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle;
+use Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle;
+use Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle;
+use Tourze\DoctrineTrackBundle\DoctrineTrackBundle;
 
 class OpenAITaskBundle extends Bundle implements BundleDependencyInterface
 {
     public static function getBundleDependencies(): array
     {
         return [
-            \Tourze\DoctrineIndexedBundle\DoctrineIndexedBundle::class => ['all' => true],
-            \Tourze\DoctrineSnowflakeBundle\DoctrineSnowflakeBundle::class => ['all' => true],
-            \Tourze\DoctrineTimestampBundle\DoctrineTimestampBundle::class => ['all' => true],
-            \Tourze\DoctrineTrackBundle\DoctrineTrackBundle::class => ['all' => true],
+            DoctrineBundle::class => ['all' => true],
+            OpenAIBundle::class => ['all' => true],
+            DoctrineIndexedBundle::class => ['all' => true],
+            DoctrineSnowflakeBundle::class => ['all' => true],
+            DoctrineTimestampBundle::class => ['all' => true],
+            DoctrineTrackBundle::class => ['all' => true],
         ];
     }
 }

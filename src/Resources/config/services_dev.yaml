@@ -1,0 +1,4 @@
+services:
+  Tourze\OpenAITaskBundle\DataFixtures\:
+    resource: '../../DataFixtures/'
+    tags: ['doctrine.fixture.orm']
