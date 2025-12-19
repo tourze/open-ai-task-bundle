@@ -33,7 +33,7 @@ use Tourze\OpenAITaskBundle\Repository\TaskRepository;
       php bin/console open-ai:task -t 1 -d
     TXT)]
 #[Autoconfigure(public: true)]
-class TaskCommand extends Command
+final class TaskCommand extends Command
 {
     public const NAME = 'open-ai:task';
 
@@ -412,7 +412,6 @@ class TaskCommand extends Command
             maxTokens: $character->getMaxTokens(),
             presencePenalty: $character->getPresencePenalty(),
             frequencyPenalty: $character->getFrequencyPenalty(),
-            // @phpstan-ignore-next-line argument.type
             tools: $toolsParam,
         );
     }

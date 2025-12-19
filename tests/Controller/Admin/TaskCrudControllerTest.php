@@ -33,31 +33,14 @@ final class TaskCrudControllerTest extends AbstractEasyAdminControllerTestCase
     /**
      * 使用Doctrine Fixtures创建测试数据
      */
-    /** @phpstan-ignore-next-line method.unused */
     private function loadTestFixtures(): void
     {
         if (!self::hasDoctrineSupport()) {
             return;
         }
 
-        // 使用Doctrine Fixtures Bundle加载测试数据
-        try {
-            // @phpstan-ignore-next-line argument.type
-            $fixtureExecutor = self::getService('doctrine.fixtures.executor');
-            // @phpstan-ignore-next-line argument.type
-            $fixtureLoader = self::getService('doctrine.fixtures.loader');
-
-            // 加载TaskFixtures
-            $fixture = new TaskFixtures();
-            // @phpstan-ignore-next-line class.notFound
-            $fixtureLoader->addFixture($fixture);
-
-            // @phpstan-ignore-next-line class.notFound
-            $fixtureExecutor->execute($fixtureLoader->getFixtures(), true);
-        } catch (\Exception $e) {
-            // 如果Fixtures加载失败，创建最小的测试数据
-            $this->createMinimalTestData();
-        }
+        // 直接创建最小的测试数据（避免依赖Fixtures服务）
+        $this->createMinimalTestData();
     }
 
     /**
@@ -102,7 +85,6 @@ final class TaskCrudControllerTest extends AbstractEasyAdminControllerTestCase
     /**
      * 检查是否有必要的依赖表存在
      */
-    /** @phpstan-ignore-next-line method.unused */
     private function hasRequiredDependencies(): bool
     {
         try {
